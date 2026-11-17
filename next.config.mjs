@@ -7,6 +7,9 @@ const nextConfig = {
   reactStrictMode: true,
   eslint: { ignoreDuringBuilds: true },
   poweredByHeader: false,
+  compress: true,
+  // only the icons/charts a screen uses end up in its bundle
+  experimental: { optimizePackageImports: ['lucide-react', 'recharts'] },
   async rewrites() {
     return [
       { source: '/api/:path*', destination: `${API_URL}/api/:path*` },
@@ -14,14 +17,20 @@ const nextConfig = {
     ];
   },
   async headers() {
-    return [{
-      source: '/:path*',
-      headers: [
-        { key: 'X-Content-Type-Options', value: 'nosniff' },
-        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-        { key: 'Permissions-Policy', value: 'camera=(self), microphone=(self), geolocation=(self)' },
-      ],
-    }];
+    const longCache = [{ key: 'Cache-Control', value: 'public, max-age=2592000, stale-while-revalidate=86400' }];
+    return [
+      { source: '/backgrounds/:path*', headers: longCache },
+      { source: '/lk.json', headers: longCache },
+      { source: '/:file(logo192.png|logo512.png|favicon.png|favicon.ico)', headers: longCache },
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(self), microphone=(self), geolocation=(self)' },
+        ],
+      },
+    ];
   },
 };
 

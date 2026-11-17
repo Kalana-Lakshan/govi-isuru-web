@@ -12,13 +12,15 @@ export default function CropSuitability({ lang = 'en', user, coords, onInteracti
     drainage: 'Moderate',
     slope: 'Flat',
     irrigation: true,
-    rainfall: 1200,
-    temperature: 28,
+    // empty = use the district's ERA5 climate (30-year average) on the server
+    rainfall: '',
+    temperature: '',
     landSizeHa: 1.0,
   });
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [error, setError] = useState('');
+  const [climate, setClimate] = useState(null);
 
   const palettes = [
     { bg: 'from-green-50 to-emerald-50', badge: 'bg-green-100 text-green-700', ring: 'ring-1 ring-green-200' },
@@ -44,7 +46,7 @@ export default function CropSuitability({ lang = 'en', user, coords, onInteracti
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setInputs(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : (name === 'soilPH' || name === 'rainfall' || name === 'temperature' || name === 'landSizeHa') ? parseFloat(value) : value }));
+    setInputs(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : (name === 'soilPH' || name === 'rainfall' || name === 'temperature' || name === 'landSizeHa') ? (value === '' ? '' : parseFloat(value)) : value }));
   };
 
   const handleSubmit = async () => {
@@ -57,6 +59,7 @@ export default function CropSuitability({ lang = 'en', user, coords, onInteracti
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setResults(res.data.recommendations || []);
+      setClimate(res.data.inputs || null);
       if (onInteraction) onInteraction();
     } catch (err) {
       if (err.response && err.response.status === 403) {
@@ -66,6 +69,7 @@ export default function CropSuitability({ lang = 'en', user, coords, onInteracti
         setError(err.response?.data?.error || err.message);
       }
       setResults([]);
+      setClimate(null);
     } finally {
       setLoading(false);
     }
@@ -102,7 +106,8 @@ export default function CropSuitability({ lang = 'en', user, coords, onInteracti
             <option>Loam</option>
             <option>Clay</option>
             <option>Sandy</option>
-            <option>Silt</option>
+            <option>Sandy Loam</option>
+            <option>Clay Loam</option>
           </select>
         </div>
         <div>
@@ -127,11 +132,11 @@ export default function CropSuitability({ lang = 'en', user, coords, onInteracti
         </div>
         <div>
           <label className="text-sm text-slate-600 dark:text-gray-400">{t.rainfall}</label>
-          <input name="rainfall" type="number" value={inputs.rainfall} onChange={handleChange} className="mt-1 w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+          <input name="rainfall" type="number" value={inputs.rainfall} onChange={handleChange} placeholder={lang === 'si' ? 'දිස්ත්‍රික්කයෙන් ස්වයංක්‍රීයව' : 'Auto from district climate'} className="mt-1 w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
         </div>
         <div>
           <label className="text-sm text-slate-600 dark:text-gray-400">{t.temperature}</label>
-          <input name="temperature" type="number" step="0.1" value={inputs.temperature} onChange={handleChange} className="mt-1 w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+          <input name="temperature" type="number" step="0.1" value={inputs.temperature} onChange={handleChange} placeholder={lang === 'si' ? 'දිස්ත්‍රික්කයෙන් ස්වයංක්‍රීයව' : 'Auto from district climate'} className="mt-1 w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
         </div>
         <div>
           <label className="text-sm text-slate-600 dark:text-gray-400">{t.landSizeHa}</label>
@@ -182,11 +187,30 @@ export default function CropSuitability({ lang = 'en', user, coords, onInteracti
                   <p className="text-slate-600 dark:text-gray-400 text-sm mt-3">{r.reason}</p>
                 )}
 
+                {r.class && (
+                  <p className="mt-3 text-xs font-semibold text-slate-600 dark:text-gray-300">
+                    FAO class {r.class}{r.class_name ? `: ${r.class_name}` : ''}
+                  </p>
+                )}
+                {r.optimal_ranges && (
+                  <p className="mt-1 text-xs text-slate-500 dark:text-gray-400">
+                    {lang === 'si' ? 'ප්‍රශස්ත' : 'Best'}: {r.optimal_ranges.temperature_c?.join('–')} °C · pH {r.optimal_ranges.soil_ph?.join('–')} · {r.optimal_ranges.rainfall_mm?.join('–')} mm
+                  </p>
+                )}
                 {r.notes && <p className="text-slate-500 dark:text-gray-400 text-xs mt-3 italic">{r.notes}</p>}
               </div>
             );
           })}
         </div>
+      )}
+
+      {results.length > 0 && climate && (
+        <p className="mt-4 text-xs text-slate-500 dark:text-gray-400">
+          {lang === 'si' ? 'භාවිත කළ දේශගුණය' : 'Climate used'}: {Math.round(climate.temperature_c * 10) / 10} °C,{' '}
+          {Math.round(climate.annual_rainfall_mm)} mm/{lang === 'si' ? 'වසර' : 'year'}
+          {climate.altitude_m != null ? `, ${Math.round(climate.altitude_m)} m` : ''}
+          {climate.climate_defaults_from ? ` (${climate.climate_defaults_from})` : ''} · FAO EcoCrop
+        </p>
       )}
     </div>
   );

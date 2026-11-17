@@ -54,3 +54,10 @@ public/            icons, manifest, service worker (push notifications), map dat
 All screens run in the browser (`ClientApp.js`, `ssr: false`), because they use `localStorage`, the camera and
 react-router. Screens can be moved one at a time to `src/app/<route>/page.js` as server or client components; the
 catch-all page keeps the rest working meanwhile.
+
+## Performance
+
+* Screens are loaded on demand (`React.lazy`). The first page downloads only the home, sign-in and registration
+  screens; charts, maps and video calls load when they are opened.
+* Background images are WebP, 0.36 MB in total instead of 2.8 MB, and are cached by browsers for 30 days.
+* `lucide-react` and `recharts` imports are trimmed to what each screen uses (`optimizePackageImports`).

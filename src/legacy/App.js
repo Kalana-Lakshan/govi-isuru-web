@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Leaf, ShoppingBag, LogOut, AlertTriangle, Newspaper, BookOpen, X, FileText, Bookmark, Shield, Sun, Moon, Menu, Search, User, Droplets, ClipboardCheck, Globe, CalendarDays, ArrowLeft, Home } from 'lucide-react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import MobileBottomNav from './components/layout/MobileBottomNav';
@@ -12,41 +12,49 @@ import {
   getViewTitle,
   isNavItemActive,
 } from './utils/navigation';
-import CropSuitability from './components/CropSuitability';
-import AIDoctor from './components/AIDoctor';
-import Marketplace from './components/Marketplace';
-import WeatherAdvisor from './components/WeatherAdvisor';
-import MarketTrends from './components/MarketTrends';
 import Register from './components/Register';
 import Login from './components/Login';
-import ForgotPassword from './components/ForgotPassword';
-import ResetPassword from './components/ResetPassword';
-import VerifyEmail from './components/VerifyEmail';
-import LlamaChatbot from './components/LlamaChatbot';
 import CreditPurchaseModal from './components/CreditPurchaseModal';
 
-import AlertsDashboard from './components/AlertsDashboard';
-import AgriNews from './components/AgriNews';
 
-import YieldPrediction from './components/YieldPrediction';
 import HomePage from './components/HomePage';
-import OfficerDashboard from './components/OfficerDashboard';
-import BuyerDashboard from './components/BuyerDashboard';
-import UserProfile from './components/UserProfile';
-import TraditionalRice from './components/TraditionalRice';
-import ReportVerification from './components/ReportVerification';
-import AdminDashboard from './components/AdminDashboard';
-import FarmerManualBooking from './components/FarmerManualBooking';
-import InstructorBookingManager from './components/InstructorBookingManager';
 
-import MyReports from './components/MyReports';
-import SavedListings from './components/SavedListings';
-import FarmerHubDashboard from './components/hubs/FarmerHubDashboard';
-import CropCareHub from './components/hubs/CropCareHub';
-import MarketHub from './components/hubs/MarketHub';
-import ConsultationHub from './components/hubs/ConsultationHub';
-import MarketHubPage from './pages/MarketHubPage';
 import { districtCoordinates } from './data/sriLankaCoordinates';
+
+const CropSuitability = lazy(() => import('./components/CropSuitability'));
+const AIDoctor = lazy(() => import('./components/AIDoctor'));
+const Marketplace = lazy(() => import('./components/Marketplace'));
+const WeatherAdvisor = lazy(() => import('./components/WeatherAdvisor'));
+const MarketTrends = lazy(() => import('./components/MarketTrends'));
+const ForgotPassword = lazy(() => import('./components/ForgotPassword'));
+const ResetPassword = lazy(() => import('./components/ResetPassword'));
+const VerifyEmail = lazy(() => import('./components/VerifyEmail'));
+const LlamaChatbot = lazy(() => import('./components/LlamaChatbot'));
+const AlertsDashboard = lazy(() => import('./components/AlertsDashboard'));
+const AgriNews = lazy(() => import('./components/AgriNews'));
+const YieldPrediction = lazy(() => import('./components/YieldPrediction'));
+const OfficerDashboard = lazy(() => import('./components/OfficerDashboard'));
+const BuyerDashboard = lazy(() => import('./components/BuyerDashboard'));
+const UserProfile = lazy(() => import('./components/UserProfile'));
+const TraditionalRice = lazy(() => import('./components/TraditionalRice'));
+const ReportVerification = lazy(() => import('./components/ReportVerification'));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+const FarmerManualBooking = lazy(() => import('./components/FarmerManualBooking'));
+const InstructorBookingManager = lazy(() => import('./components/InstructorBookingManager'));
+const MyReports = lazy(() => import('./components/MyReports'));
+const SavedListings = lazy(() => import('./components/SavedListings'));
+const FarmerHubDashboard = lazy(() => import('./components/hubs/FarmerHubDashboard'));
+const CropCareHub = lazy(() => import('./components/hubs/CropCareHub'));
+const MarketHub = lazy(() => import('./components/hubs/MarketHub'));
+const ConsultationHub = lazy(() => import('./components/hubs/ConsultationHub'));
+const MarketHubPage = lazy(() => import('./pages/MarketHubPage'));
+
+// Screens are loaded on demand: the first page only downloads what it shows.
+const ScreenLoader = () => (
+  <div className="flex items-center justify-center py-24" role="status" aria-live="polite">
+    <div className="w-10 h-10 border-4 border-green-200 border-t-green-600 rounded-full animate-spin" />
+  </div>
+);
 
 const translations = {
   en: {
@@ -315,7 +323,7 @@ function MainApp() {
     // Show Login, Register, Forgot Password, etc.
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{
-        backgroundImage: 'url(/backgrounds/farming-training.jpg)',
+        backgroundImage: 'url(/backgrounds/farming-training.webp)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
@@ -486,14 +494,14 @@ function MainApp() {
   // Get background image based on user role
   const getBackgroundImage = () => {
     if (user?.role === 'admin') {
-      return '/backgrounds/farmer-dashboard-bg.jpg';
+      return '/backgrounds/farmer-dashboard-bg.webp';
     } else if (user?.role === 'officer') {
-      return '/backgrounds/officer-dashboard-bg.jpg';
+      return '/backgrounds/officer-dashboard-bg.webp';
     } else if (user?.role === 'buyer') {
-      return '/backgrounds/buyer-dashboard-bg.jpg';
+      return '/backgrounds/buyer-dashboard-bg.webp';
     } else {
       // Farmer or no specific role
-      return '/backgrounds/farmer-dashboard-bg.jpg';
+      return '/backgrounds/farmer-dashboard-bg.webp';
     }
   };
 
@@ -651,6 +659,7 @@ function MainApp() {
 
       {/* Main Content Area - Clean Mobile Layout */}
       <main className="flex-1 overflow-y-auto bg-white dark:bg-gray-900 pb-16 md:pb-0" style={{ position: 'relative', zIndex: 1 }}>
+        <Suspense fallback={<ScreenLoader />}>
         <div className="w-full h-full flex flex-col">
           {/* Mobile Top Bar - Hamburger Menu */}
           <div className="md:hidden sticky top-0 z-20 bg-gradient-to-r from-green-600 to-emerald-600 shadow-lg">
@@ -869,6 +878,7 @@ function MainApp() {
             </div>
           </div>
         </div>
+        </Suspense>
       </main>
 
       <MobileBottomNav
@@ -878,7 +888,7 @@ function MainApp() {
       />
 
       {/* Llama 3.1 AI Chatbot - Available on all pages */}
-      <LlamaChatbot lang={lang} user={user} onNavigate={setView} />
+      <Suspense fallback={null}><LlamaChatbot lang={lang} user={user} onNavigate={setView} /></Suspense>
       {/* Credit Purchase Modal */}
       <CreditPurchaseModal
         isOpen={showCreditModal}
@@ -897,6 +907,7 @@ function MainApp() {
 export default function App() {
   return (
     <BrowserRouter>
+      <Suspense fallback={<ScreenLoader />}>
       <Routes>
         {/* Special auth routes that need URL parameters */}
         <Route path="/verify-email" element={<VerifyEmailPage />} />
@@ -906,6 +917,7 @@ export default function App() {
         {/* Main app route */}
         <Route path="/*" element={<MainApp />} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

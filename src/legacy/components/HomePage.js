@@ -311,7 +311,7 @@ const HomePage = ({ onLogin, onRegister, darkMode, setDarkMode }) => {
 
   return (
     <div style={{
-      backgroundImage: 'url(/backgrounds/farming-training.jpg)',
+      backgroundImage: 'url(/backgrounds/farming-training.webp)',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'

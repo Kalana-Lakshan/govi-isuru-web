@@ -56,10 +56,10 @@ const translations = {
       yieldResults: 'Yield Prediction Results',
       predictedYield: 'Predicted Yield',
       totalProduction: 'Total Production',
-      confidence: 'Confidence',
-      accuracy: 'accuracy',
+      confidence: 'Range reliability',
+      accuracy: 'of past seasons fell in the range',
       stabilityIndex: 'Stability Index',
-      consistent: 'consistent',
+      consistent: 'last 10 seasons',
       yieldRange: 'Expected Yield Range',
       profitForecast: 'Profit Forecast',
       estimatedProfit: 'Estimated Profit',
@@ -123,9 +123,9 @@ const translations = {
       predictedYield: 'අපේක්ෂිත අස්වැන්න',
       totalProduction: 'මුළු නිෂ්පාදනය',
       confidence: 'විශ්වාසය',
-      accuracy: 'නිරවද්‍යතාව',
+      accuracy: 'පසුගිය කන්න පරාසය තුළ',
       stabilityIndex: 'ස්ථාවරත්ව දර්ශකය',
-      consistent: 'ස්ථාවර',
+      consistent: 'පසුගිය කන්න 10',
       yieldRange: 'අපේක්ෂිත අස්වැන්න පරාසය',
       profitForecast: 'ලාභ අනාවැකිය',
       estimatedProfit: 'ඇස්තමේන්තුගත ලාභය',
@@ -571,7 +571,7 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
 
                     <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-4 text-white">
                       <p className="text-xs opacity-80">{t.results.stabilityIndex}</p>
-                      <p className="text-2xl font-bold">{formatNumber(yieldPrediction.stability_index * 100)}%</p>
+                      <p className="text-2xl font-bold">{yieldPrediction.stability_index != null ? `${formatNumber(yieldPrediction.stability_index * 100)}%` : "–"}</p>
                       <p className="text-sm">{t.results.consistent}</p>
                     </div>
                   </div>
@@ -595,6 +595,13 @@ const YieldPrediction = ({ lang = 'en', onInteraction }) => {
                         </span>
                       </div>
                     </div>
+                  )}
+                  {yieldPrediction.source && (
+                    <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                      {lang === 'si' ? 'මූලාශ්‍රය' : 'Source'}: {yieldPrediction.source.split(' (')[0]}
+                      {yieldPrediction.year ? ` · ${yieldPrediction.year} ${yieldPrediction.season === 'yala' ? 'Yala' : 'Maha'}` : ''}
+                      {yieldPrediction.last_observed ? ` · ${lang === 'si' ? 'අවසන් නිල අගය' : 'last official'} ${yieldPrediction.last_observed.year}: ${formatNumber(yieldPrediction.last_observed.yield_kg_ha)} kg/ha` : ''}
+                    </p>
                   )}
                 </div>
               )}
